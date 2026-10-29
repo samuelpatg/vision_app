@@ -8,9 +8,9 @@ def encode_image(image_file):
     return base64.b64encode(image_file.getvalue()).decode("utf-8")
 
 
-st.set_page_config(page_title="Analisis de imagen", layout="centered", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Analisis de plantas", layout="centered", initial_sidebar_state="collapsed")
 # Streamlit page setup
-st.title("Análisis de Imagen:🤖🏞️")
+st.title("Análisis de plantas:🌿🏞️")
 ke = st.text_input('Ingresa tu Clave')
 os.environ['OPENAI_API_KEY'] = ke
 
@@ -49,7 +49,7 @@ if uploaded_file is not None and api_key and analyze_button:
         # Encode the image
         base64_image = encode_image(uploaded_file)
     
-        prompt_text = ("Describe what you see in the image in spanish")
+        prompt_text = ("Describe the plant you see and how to take care of it, in spanish")
     
         if show_details and additional_details:
             prompt_text += (
