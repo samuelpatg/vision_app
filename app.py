@@ -1,29 +1,48 @@
-
 import streamlit as st
  
+from estilo import aplicar_estilo, hero
+ 
 st.set_page_config(page_title="Maceta inteligente", page_icon="🪴", layout="centered")
+aplicar_estilo()
  
-st.title("🪴 Maceta inteligente")
-st.write(
-    "Identifica tu planta con inteligencia artificial y conecta la información "
-    "con una maceta simulada en Wokwi que mide la humedad y te avisa con LEDs "
-    "cuándo regar."
+hero(
+    "Maceta inteligente",
+    "Identifica tu planta con IA y deja que tu maceta te avise cuándo regar.",
+    "🪴",
 )
  
-st.subheader("¿Cómo funciona?")
-st.markdown(
-    """
-1. **Identificar planta:** sube o toma una foto. La IA reconoce la planta, te da
-   sus cuidados y el rango de humedad ideal.
-2. **Mi maceta:** envía ese rango al ESP32 y monitorea la humedad en tiempo real.
-   Los LEDs indican si debes regar (rojo), si todo está bien (verde) o si hay
-   exceso de agua (amarillo).
-"""
-)
+st.markdown("### ¿Cómo funciona?")
  
-col1, col2 = st.columns(2)
-with col1:
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.markdown(
+        '<div class="paso"><span class="paso-num">1</span>'
+        '<div class="paso-titulo">📸 Identifica</div>'
+        '<div class="paso-texto">Sube o toma una foto. La IA reconoce la planta, te da sus '
+        "cuidados y su rango de humedad ideal.</div></div>",
+        unsafe_allow_html=True,
+    )
+with c2:
+    st.markdown(
+        '<div class="paso"><span class="paso-num">2</span>'
+        '<div class="paso-titulo">📡 Conecta</div>'
+        '<div class="paso-texto">Envía ese rango a la maceta simulada en Wokwi (ESP32) '
+        "por MQTT, en ambos sentidos.</div></div>",
+        unsafe_allow_html=True,
+    )
+with c3:
+    st.markdown(
+        '<div class="paso"><span class="paso-num">3</span>'
+        '<div class="paso-titulo">💧 Cuida</div>'
+        '<div class="paso-texto">Mira la humedad en tiempo real. Los LEDs te dicen si regar, '
+        "si todo está bien o si hay exceso de agua.</div></div>",
+        unsafe_allow_html=True,
+    )
+ 
+st.write("")
+b1, b2 = st.columns(2)
+with b1:
     st.page_link("pages/1_Identificar_planta.py", label="Identificar planta", icon="🌿")
-with col2:
-    st.page_link("pages/2_Mi_maceta.py", label="Mi maceta", icon="🪴")
+with b2:
+    st.page_link("pages/2_Mi_maceta.py", label="Ver mi maceta", icon="🪴")
  
