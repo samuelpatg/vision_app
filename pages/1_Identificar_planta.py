@@ -1,13 +1,16 @@
 import base64
+import html
 import json
  
 import streamlit as st
 from openai import OpenAI
  
+from estilo import aplicar_estilo, barra_rango, hero
 from mqtt_utils import publicar_config
  
 st.set_page_config(page_title="Identificar planta", page_icon="🌿", layout="centered")
-st.title("🌿 Identificar planta")
+aplicar_estilo()
+hero("Identificar planta", "Una foto y la IA te cuenta cómo cuidarla.", "🌿")
  
 PROMPT = """Eres un experto en botánica. Analiza la imagen y responde SOLO con un JSON válido con estas claves:
 - "es_planta": true o false
@@ -66,6 +69,10 @@ def limpiar_umbrales(ficha):
     return hmin, hmax
  
  
+def esc(texto):
+    return html.escape(str(texto))
+ 
+ 
 api_key = obtener_api_key()
  
 # --- Modalidad de entrada: subir archivo o usar la cámara ---
@@ -84,13 +91,13 @@ pregunta = st.text_area(
     placeholder="Ej.: sus hojas se ven amarillas, ¿qué puede ser?",
 )
  
-if st.button("Analizar planta", type="primary"):
+if st.button("🔍 Analizar planta", type="primary"):
     if not imagen:
         st.warning("Primero sube o toma una foto.")
     elif not api_key:
         st.warning("Ingresa tu clave de OpenAI.")
     else:
-        with st.spinner("Analizando..."):
+        with st.spinner("Analizando tu planta..."):
             try:
                 ficha = analizar(imagen.getvalue(), imagen.type or "image/jpeg", pregunta, api_key)
             except Exception as e:
@@ -110,27 +117,25 @@ if st.button("Analizar planta", type="primary"):
 # --- Resultado (se conserva entre ejecuciones) ---
 ficha = st.session_state.get("ficha")
 if ficha:
-    st.divider()
-    st.subheader(f"{ficha.get('planta', 'Planta')}")
-    st.caption(ficha.get("nombre_cientifico", ""))
-    st.write(ficha.get("descripcion", ""))
- 
-    st.markdown("**Cuidados**")
-    for consejo in ficha.get("cuidados", []):
-        st.markdown(f"- {consejo}")
- 
-    col1, col2 = st.columns(2)
-    col1.metric("Frecuencia de riego", ficha.get("frecuencia_riego", "—"))
-    col2.metric(
-        "Humedad ideal",
-        f"{st.session_state['hmin']}% – {st.session_state['hmax']}%",
+    hmin, hmax = st.session_state["hmin"], st.session_state["hmax"]
+    cuidados = "".join(f"<li>{esc(c)}</li>" for c in ficha.get("cuidados", []))
+    st.markdown(
+        '<div class="tarjeta">'
+        f'<div class="tarjeta-titulo">🌱 {esc(ficha.get("planta", "Planta"))}</div>'
+        f'<div class="tarjeta-cientifico">{esc(ficha.get("nombre_cientifico", ""))}</div>'
+        f'<div>{esc(ficha.get("descripcion", ""))}</div>'
+        "<h4>Cuidados</h4>"
+        f"<ul>{cuidados}</ul>"
+        '<div class="mini-datos">'
+        f'<div class="mini"><div class="mini-etq">Frecuencia de riego</div><div class="mini-val">💧 {esc(ficha.get("frecuencia_riego", "—"))}</div></div>'
+        f'<div class="mini"><div class="mini-etq">Humedad ideal</div><div class="mini-val">🎯 {hmin}% – {hmax}%</div></div>'
+        "</div>"
+        f"{barra_rango(hmin, hmax)}"
+        "</div>",
+        unsafe_allow_html=True,
     )
  
-    if st.button("🪴 Enviar a mi maceta"):
-        publicar_config(
-            st.session_state["planta"],
-            st.session_state["hmin"],
-            st.session_state["hmax"],
-        )
-        st.success("Configuración enviada. Ve a la página «Mi maceta» para ver el resultado.")
+    if st.button("🪴 Enviar a mi maceta", type="primary"):
+        publicar_config(st.session_state["planta"], hmin, hmax)
+        st.success("Configuración enviada. Ve a «Mi maceta» para ver el resultado.")
  
